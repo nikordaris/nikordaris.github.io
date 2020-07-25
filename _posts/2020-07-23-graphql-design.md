@@ -5,9 +5,11 @@ date: 2020-07-23 22:23:00 -0500
 tags: [graphql]
 ---
 
+![Desktop View]({{ "/assets/img/graphql-design/banner.jpg" | relative_url }})
+
 # Introduction
 
-GraphQL enables us to explicitly describe our API to remove ambiguity from how our systems communicate. However, without a standard way of designing our API we can still find ourselves with a confusing and unclear explicitly defined API.
+GraphQL enables us to _explicitly_ describe our API to remove ambiguity from how our systems communicate. However, without a standard way of designing our API we can still find ourselves with an _explicitly unclear_ API.
 
 With RESTful APIs the convention is to treat paths like resources with each pathname taking you deeper into a more specific resource of your data. GraphQL doesn't have these long accepted conventions to help guide us as to how we should design our Schema Graph. This means each team must explicitly define their own. At CyberGRX, we've discover these design patterns over the years either through hard learned lessons or heeding the warnings of others in the community.
 
