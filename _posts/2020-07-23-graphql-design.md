@@ -1,6 +1,6 @@
 ---
 title: GraphQL Schema Design
-author: Nikordaris
+author: Nick Harris
 date: 2020-07-23 22:23:00 -0500
 tags: [graphql]
 ---
@@ -9,17 +9,17 @@ tags: [graphql]
 
 # Introduction
 
-GraphQL enables us to _explicitly_ describe our API to remove ambiguity from how our systems communicate. However, without a standard way of designing our API we can still find ourselves with an _explicitly unclear_ API.
+[GraphQL](https://graphql.org/learn/) enables us to _explicitly_ describe our API to remove ambiguity from how our systems communicate. However, without a standard way of designing our API we can still find ourselves with an _explicitly unclear_ API.
 
 With RESTful APIs the convention is to treat paths like resources with each pathname taking you deeper into a more specific resource of your data. GraphQL doesn't have these long accepted conventions to help guide us as to how we should design our Schema Graph. This means each team must explicitly define their own. At CyberGRX, we've discover these design patterns over the years either through hard learned lessons or heeding the warnings of others in the community.
 
 # Versioning
 
-The GraphQL spec recommends a versionless design strategy which means changes are always backwards compatible. GraphQL supports this by enabling deprecation metadata for fields. This can be frustrating for some designers who want to keep a clean schema but it enables rapid development through asynchronous schema syncs between server and client. The client can wait to pull in the latest schema until they are ready for the changes.
+The GraphQL spec recommends a [versionless](https://graphql.org/learn/best-practices/#versioning) design strategy which means changes are always backwards compatible. GraphQL supports this by enabling deprecation metadata for fields. This can be frustrating for some designers who want to keep a clean schema but it enables rapid development through asynchronous schema syncs between server and client. The client can wait to pull in the latest schema until they are ready for the changes.
 
 With all of this said, if your GraphQL schema is private and for internal use only then you have a lot more control over coordinated breaking changes. However, this should be discouraged and reserved for only rare exceptions such as major redesign efforts.
 
-> Don't add something to your schema until you need to expose that data. Adding data is cheap, taking it away is expensive.
+> Don't add something to your schema until you need to expose that data. Adding data is cheap, taking it away is expensive. [YAGNI Principle](https://en.wikipedia.org/wiki/You_aren%27t_gonna_need_it)
 
 # Queries
 
