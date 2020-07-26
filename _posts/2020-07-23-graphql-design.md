@@ -11,7 +11,7 @@ tags: [graphql]
 
 [GraphQL](https://graphql.org/learn/) enables us to _explicitly_ describe our API to remove ambiguity from how our systems communicate. However, without a standard way of designing our API we can still find ourselves with an _explicitly unclear_ API.
 
-With RESTful APIs the convention is to treat paths like resources with each pathname taking you deeper into a more specific resource of your data. GraphQL doesn't have these long accepted conventions to help guide us as to how we should design our Schema Graph. This means each team must explicitly define their own. The following are some strategies to help keep you out of trouble when designing your schema.
+With RESTful APIs the convention is to treat paths like resources with each pathname taking you deeper into a more specific resource of your data. It also has documentation around how HTTP verbs interact with resources. GraphQL doesn't have these long accepted conventions to help guide us as to how we should design our Schema. This means each team must explicitly define their own. The following are some strategies to help keep you out of trouble when designing your schema.
 
 # Versioning
 
@@ -180,7 +180,7 @@ So what does offset give you vs cursor? The biggest one is client side index mat
 
 # Mutations
 
-GraphQL only has a single write protocol definition unlike RESTful’s PUT, POST, PATCH and DELETE. This means naming conventions are really important for a team to convey intentions. If you are looking to establish a convention, then the following is a good starting point. The important thing is consistency in your schema.
+GraphQL only has a single write protocol called `Mutation` unlike RESTful’s `PUT`, `POST`, `PATCH` and `DELETE`. This means naming conventions are really important for a team to convey intentions. The following is how I've broken down Mutation field names to convey a consistent API for the different write strategies you may want to expose.
 
 ## Create
 
@@ -198,16 +198,29 @@ mutation {
 }
 ```
 
-## Update and Replace
+## Update
 
-Some server implementations have struggled to distinguish between `NULL` values vs missing keys. Additionally, many client forms struggle with how you handle dirty empty fields. This has made `PATCH` equivalent operations to be very challenging. Because of how error prone patch updates are I've stopped supporting generic patch update mutations. Instead, `update[TYPE_NAME]` is a put and replace operation.
+Updates to existing data generally fall into two categories replace the entire document object or partially update a subset of fields for the document object.
+
+### Replace Entire Object
+
+For updating the entire object we use the naming convention of, `update[TYPE_NAME]`. The input arguments should include all mutable fields for the object and required arguments should be marked as `NonNull`. The return type should be the type being modified. This is important so the client cache can get updated appropriately.
 
 ```graphql
+type User {
+  name: String!
+  bio: String
+}
+
+type Mutation {
+  updateUser(id: ID!, name: String!, bio: String): User
+}
+
 mutation {
-  updateUser(id: 1, firstName: "Jane", lastName: "Smith") {
+  updateUser(id: 1, name: "Jane Smith", bio: "CEO of Awesomeness") {
     id
-    firstName
-    lastName
+    name
+    bio
   }
 }
 ```
@@ -217,21 +230,21 @@ mutation {
   "data": {
     "updateUser": {
       "id": 1,
-      "fistName": "Jane",
-      "lastName": "Smith"
+      "name": "Jane Smith",
+      "bio": "CEO of Awesomeness"
     }
   }
 }
 ```
 
-Now what happens if our schema doesn’t make lastName required and we exclude that value? What should our expectation be about the returned data response? If we are implementing an update and replace strategy our expectations should be that we just set that missing property to `NULL`.
+Now what happens if we don't set `bio`? Our expectation should be that `bio` is set to `NULL`.
 
 ```graphql
 mutation {
-  updateUser(id: 1, firstName: "Jane") {
+  updateUser(id: 1, name: "Jane Smith") {
     id
-    firstName
-    lastName
+    name
+    bio
   }
 }
 ```
@@ -241,52 +254,62 @@ mutation {
   "data": {
     "updateUser": {
       "id": 1,
-      "fistName": "Jane",
-      "lastName": null
+      "name": "Jane Smith",
+      "bio": null
     }
   }
 }
 ```
 
-Some fields, like lastName, you may not want to ever be null but some might be appropriate. With update and replace strategy you should explicitly define what arguments are `NonNull` and what can be Null. This will ensure violators will error on the client side and avoid an unnecessary round trip to the server.
+With update and replace the API schema will match the data validation. This leaves little room for confusion and bugs but at the expense of managing more data than the client needs. This strategy makes the most sense for forms that provide an ability to change multiple document fields with a single submit.
 
-## Patch Update
+### Custom Field Setters
 
-Ok, so we can't trust the server or the client to handle missing fields correctly for patches, so what do we do? We just have to be very explicit in our schema definition to what we are updating. This is where naming conventions come in to save the day. If we don’t want the network bandwidth overhead of passing the entire user object for every update we can define explicit partial update mutations.
+Even in REST there is an education effort with engineers to ensure the verbs `PUT`, `POST` and `PATCH` are used correctly. And even in REST partial updates are the source of developer mistakes. The core of the issue centers around distinguishing between `NULL` and `UNDEFINED`. Not to mention the confusion between required fields for the API vs required fields for the data. Throw in some complex cascading field validation scenarios and now your partial update gets really complicated because you need the entire model to properly validate updating a field.
+
+The solution is to instead of supporting generic `patch[TYPE_NAME]` mutation functions, we create custom update functions for the needs of the client. This stays within our design goal of validation consistency between our API schema and our data while also enabling the client to perform partial updates.
 
 ```graphql
+type Mutation {
+  updateUserName(id: ID!, name: String!): User
+}
+
 mutation {
-  updateUserLastName(id: 1, lastName: "Smith") {
+  updateUserName(id: 1, name: "Janet Smith") {
     id
-    firstName
-    lastName
-    createdAt
-    updatedAt
+    name
+    bio
   }
 }
 ```
 
-This explicit mutation immediately clears up any ambiguity over what fields are required and what the mutation function will do. I am now able to use GraphQL spec to enforce that the `id` and `lastName` are required fields so that `lastName` can't get replaced with a null value. Whereas with a generic patch mutation function the GraphQL schema gives no guidance to the client as to what arguments are Nullable because it can't distinguish between allowing the argument to be missing vs allowing the argument to be Nullable.
+```json
+{
+  "data": {
+    "updateUserName": {
+      "id": 1,
+      "name": "Janet Smith",
+      "bio": "CEO of Awesomeness"
+    }
+  }
+}
+```
+
+This explicit mutation immediately clears up any ambiguity over what fields are required and what fields will get updated. I am now able to use GraphQL spec to enforce that the `id` and `name` are required fields and I will not be updating the optional `User` field `bio`. Whereas with a generic patch mutation function the GraphQL schema gives no guidance to the client as to what arguments are Nullable because it can't distinguish between allowing the argument to be missing vs allowing the argument to be Nullable.
 
 ## Delete
 
-Delete operations should be named `delete[TYPE_NAME]` and should return the deleted object. Many GraphQL articles will give delete examples that have an `ok: Boolean` response object. This is not recommended because of how Apollo caching works. Returning a handler to the modified object is always required so that the client cache can get appropriately updated. Client developers have options to ensure the cache gets correctly updated but we shouldn’t make it hard on them, so return the resource object.
+Delete operations should be named `delete[TYPE_NAME]` and will remove that resource and all references to it.
 
 ```graphql
-mutation {
-  deleteUser(id: 1) {
-    id
-    firstName
-    lastName
-    createdAt
-    updatedAt
-  }
+type Mutation {
+  deleteUser(id: ID!): Boolean
 }
 ```
 
 ## Remove
 
-While delete removes a resource object from the database, `remove[LIST_ITEM]` should remove an item from a logical list and not delete the resource itself from the database. This is a subjective naming convention that has no technical justification for adoption other than consistency which gives us self documenting schemas.
+While delete removes a resource object from the database, `remove[LIST_ITEM]` should remove an item from a logical list and not delete the resource itself from the database. This is a subjective naming convention that has no technical justification for adoption other than consistency.
 
 ```graphql
 mutation {
@@ -296,17 +319,16 @@ mutation {
 }
 ```
 
-In this example the logical list is implied because of our domain model. A company only has a single list of customers and so the root query does not need to provide more context to the server. But what if this was called deleteCustomer instead? If you remove one of your Customers does it delete them from the platform for other users? If the platform’s action button said Delete that would be a legitimate point of confusion for the user which means it would be a legitimate point of confusion for our Schema design too.
+In this example the logical list is implied because of our domain model. A company only has a single list of customers and so the root query does not need to provide more context to the server. But what if this was called `deleteCustomer` instead? If you remove one of your Customers does it delete the Company from the platform for other users? If the platform’s UI button said `Delete Company` that would be a legitimate point of confusion for the user which means it would be a legitimate point of confusion for our Schema design too.
 
-# Errors and Alternative Responses
+# Errors and Alternative Results
 
-This has been a contentious topic of debate within the GraphQL community since the beginning but the dust has settled and the majority of the community has come to an agreement. Schema designers should distinguish between an Error and an Alternative Response data structure. The main distinguishing difference between the two is:
+This has been a contentious topic of debate within the GraphQL community since the beginning but the dust has settled and the majority of the community has come to an agreement. Schema designers should distinguish between an Error and an [Alternative Result](https://medium.com/@sachee/200-ok-error-handling-in-graphql-7ec869aec9bc) data structure. The main distinguishing difference between the two is:
 
-Error - The operation failed and there is nothing the client can do about it. Someone should probably file a bug report
+- **Error**: The operation failed and there is nothing the client can do about it. Someone should probably file a bug report
+- **Alternative Result**: An expected error happened and the client should be explicitly told what happened so they can choose to do something about it.
 
-Alternative Response - An expected error happened and the client should be explicitly told what happened so they can choose to do something about it.
-
-What this means is some “errors” are actually just one of the known workflows that the client should manage with an explicit user experience. The way you can design for this in GraphQL is with Union types. Lets look at a complex scenario where we have a long running operation to calculate risk scores that requires authorization by the third party and requires premium subscription with us. We want to succinctly support giving the client the right data so they can render the correct view. We can accomplish this with a Union of 4 response types
+What this means is some “errors” are actually just one of the known workflows that the client should manage with an explicit user experience. The way you can design for this in GraphQL is with `Union` types. Lets look at a complex scenario where we have a long running operation to calculate Cyber Risk Scores for your Third Parties that requires authorization by the third party and requires premium subscription with [CyberGRX](https://www.cybergrx.com). We want to succinctly support giving the client UI the right data so they can render the correct view. We can accomplish this with a Union of 4 response types
 
 ```graphql
 enum AuthStatus {
@@ -331,9 +353,16 @@ type PremiumFeatureResponse {
   salesRepEmail: String!
 }
 
+type Risk {
+  name: String!
+  category: String!
+  score: Float!
+  mitigationStrategy: String!
+}
+
 type Score {
-  javelin: Int
-  threatIntel: Int
+  summary: String!
+  topRisks: [Risk!]!
 }
 
 union ScoreResponse =
@@ -344,18 +373,21 @@ union ScoreResponse =
 
 type ThirdParty {
   name: String!
-  inheritRisk: String
   score: ScoreResponse
 }
 
 query {
   myThirdParties {
     name
-    inheritRisk
     score {
       ... on Score {
-        javelin
-        threatIntel
+        summary
+        topRisks {
+          name
+          category
+          score
+          mitigationStrategy
+        }
       }
       ... on PremiumFeatureResponse {
         featureName
@@ -376,19 +408,23 @@ query {
 }
 ```
 
-In this example we now have a very clean way for the client to render appropriate views for the alternative responses for getting a third party’s score. Because the score is NonNull this also means the client could choose to not care about one of the alternative responses
+In this example we now have a very clean way for the client to render appropriate views for the alternative results for getting a third party’s score. Because the score is NonNull this also means the client could choose to not care about one of the alternative results
 
-Lets look at a scenario where the client doesn’t care about upselling they only care about scores and in progress calculations. We don’t have to change the schema for this, the client can just ask for only what they care about.
+Lets look at a scenario where the client only cares about scores and in progress calculations. We don’t have to change the schema for this, the client can just ask for only what they care about.
 
 ```graphql
 query {
   myThirdParties {
     name
-    inheritRisk
     score {
       ... on Score {
-        javelin
-        threatIntel
+        summary
+        topRisks {
+          name
+          category
+          score
+          mitigationStrategy
+        }
       }
       ... on ScoresCalculatingResponse {
         progress
@@ -405,24 +441,27 @@ query {
     "myThirdParties": [
       {
         "name": "Sample Company",
-        "inheritRisk": "Foobar",
-        "score": null // NotAuthorized or PremiumFeatureResponse
+        "score": {} // NotAuthorized or PremiumFeatureResponse
       }
     ]
   }
 }
 ```
 
-The client can choose in this scenario not render the score component if null and hide the fact that the user was not authorized to view scores for whatever reason. The schema design gives the client the flexibility to choose the user experience. But what if we raised a GraphQL error for this unauthorized data request and didn’t use Unions at all?
+The client can choose in this scenario to not render the score component if score is empty and hide the fact that the user was not authorized to view scores for whatever reason. The schema design gives the client the flexibility to choose the user experience. But what if we raised a GraphQL error for this unauthorized data request and didn’t use Unions at all?
 
 ```graphql
 query {
   myThirdParties {
     name
-    inheritRisk
     score {
-      javelin
-      threatIntel
+      summary
+      topRisks {
+        name
+        category
+        score
+        mitigationStrategy
+      }
     }
   }
 }
@@ -435,7 +474,7 @@ query {
       {
         "name": "Sample Company",
         "inheritRisk": "Foobar",
-        "score": null // NotAuthorized or PremiumFeatureResponse
+        "score": null // NotAuthorized or PremiumFeatureResponse or InProgress
       }
     ]
   },
@@ -448,4 +487,4 @@ query {
 }
 ```
 
-In this schema design the client is now forced to only support not rendering scores when null. Alternative user experiences is not supported. The client has no idea whether the scores aren’t available yet, the third party didn’t authorize them, or if they haven’t paid for the correct premium access. In fact the user doesn’t even know scores could be presented on the view the client renders. This schema design forces a specific UX that may not be desirable and may potentially result in an error alert depending on how the client handles GraphQL Errors. Understanding the alternative responses is critical in schema design so that the end user experience is not restricted
+In this schema design the client is now forced to only support not rendering scores when null. Alternative user experiences is not supported. The client has no idea whether the scores aren’t available yet, the third party didn’t authorize them, or if they haven’t paid for the correct premium access. In fact the user doesn’t even know scores _could_ be presented on the view the client renders. This schema design forces a specific UX that may not be desirable and may potentially result in an error alert depending on how the client handles GraphQL Errors. Understanding the alternative results is critical in schema design so that the end user experience is not restricted
