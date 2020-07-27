@@ -66,11 +66,20 @@ layout: page
 
     <div class="post-meta text-muted">
       <!-- posted date -->
-      <i class="far fa-clock fa-fw"></i>
+      <i class="far fa-calendar fa-fw"></i>
       <span class="timeago" data-toggle="tooltip" data-placement="bottom"
         title="{{ post.date | date: site.data.date_format.tooltip }}">
       {{ post.date | date: site.data.date_format.post }}
       <i class="unloaded">{{ post.date | date_to_xmlschema }}</i>
+      </span>
+      <!-- time to read -->
+      {% capture read_time %} 
+        {{post.content | reading_time}} 
+      {% endcapture %} 
+
+      <i class="far fa-clock fa-fw"></i>
+      <span class="timeago" data-toggle="tooltip" data-placement="bottom" title="{{read_time}} min read">
+        {{read_time}} min
       </span>
       <!-- page views -->
       {% if site.google_analytics.pv.enabled %}

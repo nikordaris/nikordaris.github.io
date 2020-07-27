@@ -32,6 +32,14 @@ layout: default
             {{ site.author }}
           {% endif %}
           </span>
+          {% capture read_time %} 
+            {{page.content | reading_time}} 
+          {% endcapture %} 
+
+          <i class="far fa-clock fa-fw"></i>
+          <span class="timeago" data-toggle="tooltip" data-placement="bottom" title="{{read_time}} min read">
+            {{read_time}} min
+          </span>
         </div>
 
         <!-- lastmod -->

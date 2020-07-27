@@ -7,7 +7,7 @@
 # MIT licensed
 
 # jekyll-seo-tag settings › https://github.com/jekyll/jekyll-seo-tag/blob/master/docs/usage.md
-title: Nikordaris # the main title
+title: Nick Harris # the main title
 
 # tagline: A text-focused Jekyll theme.  # it will display as the sub-title
 
@@ -19,9 +19,9 @@ description: >- # used by seo meta and the atom feed
 # Replace with the website url, e.g. 'https://username.github.io'
 url: "https://nikordaris.github.io"
 
-author: Nikordaris # change to your full name
+author: Nick Harris # change to your full name
 
-avatar: /assets/img/sample/avatar.png # support internet resources
+avatar: /assets/img/avatar.png # support internet resources
 
 github:
   username: Nikordaris # change to your github username
@@ -30,7 +30,7 @@ twitter:
   username: Nikordaris # change to your twitter username
 
 social:
-  name: Nikordaris # it will shows as the copyright owner in Footer
+  name: Nick Harris # it will shows as the copyright owner in Footer
   email: nikordaris@gmail.com # change to your email address
   links:
     # The first element serves as the copyright owner's link
@@ -49,7 +49,7 @@ google_site_verification: google_meta_tag_verification # change to your verifica
 baseurl: ""
 
 # Change to your timezone › http://www.timezoneconverter.com/cgi-bin/findzone/findzone
-timezone: Asia/Shanghai
+timezone: America/Chicago
 
 google_analytics:
   id: "UA-172985080-1" # Fill with your Google Analytics ID
