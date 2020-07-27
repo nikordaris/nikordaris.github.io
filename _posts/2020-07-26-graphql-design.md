@@ -1,7 +1,7 @@
 ---
 title: GraphQL Schema Design
 author: Nick Harris
-date: 2020-07-23 22:23:00 -0500
+date: 2020-07-26 20:46:00 -0500
 tags: [graphql]
 ---
 
