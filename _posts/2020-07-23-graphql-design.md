@@ -11,7 +11,7 @@ tags: [graphql]
 
 [GraphQL](https://graphql.org/learn/) enables us to _explicitly_ describe our API to remove ambiguity from how our systems communicate. However, without a standard way of designing our API we can still find ourselves with an _explicitly unclear_ API.
 
-With RESTful APIs the convention is to treat paths like resources with each pathname taking you deeper into a more specific resource of your data. It also has documentation around how HTTP verbs interact with resources. GraphQL doesn't have these long accepted conventions to help guide us as to how we should design our Schema. This means each team must explicitly define their own. The following are some strategies to help keep you out of trouble when designing your schema.
+With RESTful APIs, the convention is to treat paths like resources with each pathname taking you deeper into a more specific resource of your data. It also has documentation around how HTTP verbs interact with resources. GraphQL doesn't have these long accepted conventions to help guide our Schema design. This means each team must explicitly define their own conventions. These are some of the design strategies that I've found the most helpful.
 
 # Versioning
 
@@ -26,10 +26,8 @@ Treating paths as resources is actually a pretty good approach even for GraphQL.
 ```graphql
 query {
   myCompany {
-    name
     owner {
-      firstName
-      lastName
+      name
     }
   }
 }
@@ -43,19 +41,18 @@ query {
     name
   }
   myCompanyOwner {
-    firstName
-    lastName
+    name
   }
 }
 ```
 
-This gives us the same information but is one better than the other? The answer is, it depends.
+This gives us the same information but is one better than the other? The answer is, it depends. These are some guides to help you with your decision
 
-1. Is the data for my query atomically bound to other data?
-1. Is the other atomically bound data expensive to query?
-1. Does my data frequently change?
-
-Each of these questions gets you to think about where a given data resource should get resolved. Lets dive deeper into some key query scenarios.
+1. Favor less root queries
+1. Leverage parent context data to reduce required query arguments
+1. Let business workflow entry points define your root queries
+1. Your GraphQL schema is not 1:1 to your Database Schema
+1. Measure performance and optimize your schema based on common queries.
 
 ## Leveraging Parent Resource Context
 
@@ -88,7 +85,7 @@ This has the advantage of enabling the client to also request information on the
 
 ## Performance > Good Design
 
-While nesting data into ownership hierarchies may make logical sense for your data, it could cause some serious performance challenges. If the client doesn't request the parent data, GraphQL saves us the bandwidth to the client but our parent resolver still executed the database query. For example:
+While nesting data into ownership hierarchies may make logical sense for your data, it could cause some serious performance challenges. If the client doesn't request the parent data, GraphQL wil save us the bandwidth to the client but our parent resolver still executed the database query. For example:
 
 ```graphql
 query {
