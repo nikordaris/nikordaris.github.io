@@ -46,7 +46,7 @@ query {
 }
 ```
 
-This gives us the same information but is one better than the other? The answer is, it depends. These are some guides to help you with your decision
+This gives us the same information but is one better than the other? The answer is, it depends. Consider the following when designing your schema:
 
 1. Favor less root queries
 1. Leverage parent context data to reduce required query arguments
