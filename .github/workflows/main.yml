@@ -3,12 +3,12 @@ name: Build and Deploy to Github Pages
 on:
   push:
     branches:
-      - develop  # Here source code branch is `master`, it could be other branch
+      - develop # Here source code branch is `master`, it could be other branch
 
 jobs:
-  build_and_deploy:
+  jekyll:
     runs-on: ubuntu-latest
-      steps:
+    steps:
       - uses: actions/checkout@v2
 
       # Use GitHub Actions' cache to cache dependencies on servers
@@ -22,9 +22,9 @@ jobs:
       # Use GitHub Deploy Action to build and deploy to Github
       - uses: jeffreytse/jekyll-deploy-action@v0.1.0
         with:
-          provider: 'github'
+          provider: "github"
           token: ${{ secrets.JEKYLL_PAT }}
-          repository: ''             # Default is current repository
-          branch: 'master'         # Default is gh-pages for github provider
-          jekyll_src: './'           # Default is root directory
-          jekyll_cfg: '_config.yml'  # Default is _config.yml
+          repository: "" # Default is current repository
+          branch: "master" # Default is gh-pages for github provider
+          jekyll_src: "./" # Default is root directory
+          jekyll_cfg: "_config.yml" # Default is _config.yml
