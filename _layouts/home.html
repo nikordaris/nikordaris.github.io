@@ -73,17 +73,13 @@ layout: page
       <i class="unloaded">{{ post.date | date_to_xmlschema }}</i>
       </span>
       <!-- time to read -->
-      {% capture count_words %} 
-        {{ post.content | number_of_words }} 
-      {% endcapture %}
-            
-      {% capture time_words %} 
-        {{count_words | divided_by: 5}} 
+      {% capture read_time %} 
+        {{post.content | reading_time}} 
       {% endcapture %} 
-      
+
       <i class="far fa-clock fa-fw"></i>
-      <span class="timeago" data-toggle="tooltip" data-placement="bottom" title="{{time_words | divided_by: 60}} min read">
-        {{time_words | divided_by: 60}} min
+      <span class="timeago" data-toggle="tooltip" data-placement="bottom" title="{{read_time}} min read">
+        {{read_time}} min
       </span>
       <!-- page views -->
       {% if site.google_analytics.pv.enabled %}
