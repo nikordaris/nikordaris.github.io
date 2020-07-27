@@ -25,6 +25,6 @@ jobs:
             provider: 'github'
             token: ${{ secrets.JEKYLL_PAT }}
             repository: ''             # Default is current repository
-            branch: 'gh-pages'         # Default is gh-pages for github provider
+            branch: 'master'         # Default is gh-pages for github provider
             jekyll_src: './'           # Default is root directory
             jekyll_cfg: '_config.yml'  # Default is _config.yml
