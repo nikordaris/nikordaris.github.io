@@ -13,8 +13,8 @@ Principal Software Engineer at [CyberGRX](https://www.cybergrx.com) specializing
 
 - Python
 - GraphQL
-- Neo4j | SQL
-- React | Javascript | Typescript
+- Neo4j / SQL
+- React / Javascript / Typescript
 - Java EE
 - Concurrency & Parallelism
 - Microservice Architecture
