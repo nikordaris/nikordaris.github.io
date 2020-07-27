@@ -7,16 +7,18 @@ title: About
 # MIT License
 ---
 
-Principle Software Engineer at [CyberGRX](https://www.cybergrx.com) specializing in crushing dreams that don't meet company Architectural goals and industry best practices.
+Principal Software Engineer at [CyberGRX](https://www.cybergrx.com) specializing in crushing dreams that don't meet company Architectural goals and industry best practices.
 
 ## Stuff I know
 
 - Python
 - GraphQL
-- Neo4j
-- React
+- Neo4j | SQL
+- React | Javascript | Typescript
 - Java EE
+- Concurrency & Parallelism
 - Microservice Architecture
+- Domain Driven Design
 - Technical Leadership
 - Remote Life
 
@@ -24,7 +26,7 @@ Principle Software Engineer at [CyberGRX](https://www.cybergrx.com) specializing
 
 - Parenting Twins
 - Kubernetes
-- ETL Directed Acyclic Graph Scheduling
+- Scheduling Directed Acyclic Graph ETLs
 - Golang
 - 3D Printing
 - Home Automation
