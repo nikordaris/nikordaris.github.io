@@ -85,7 +85,7 @@ This has the advantage of enabling the client to also request information on the
 
 ## Performance > Good Design
 
-While nesting data into ownership hierarchies may make logical sense for your data, it could cause some serious performance challenges. If the client doesn't request the parent data, GraphQL wil save us the bandwidth to the client but our parent resolver still executed the database query. For example:
+While nesting data into ownership hierarchies may make logical sense for your data, it could cause some serious performance challenges. If the client doesn't request the parent data, GraphQL will save us the bandwidth to the client but our parent resolver still executed the database query. For example:
 
 ```graphql
 query {
