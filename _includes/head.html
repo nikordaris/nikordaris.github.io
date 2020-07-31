@@ -87,9 +87,11 @@
   {% if page.summary %}
   <meta property="og:type" content="article" />
   <meta name="og:description" content="{{ page.summary }}">
+  <meta property="description" content="{{ page.summary }}">
   {% else %}
   <meta property="og:type" content="website" />
   <meta name="og:description" content="{{ site.description }}">
+  <meta property="description" content="{{ site.description }}">
   {% endif %}
   {% if page.image %}
   <meta name="og:image" content="{{ site.url }}{{ page.image }}">
