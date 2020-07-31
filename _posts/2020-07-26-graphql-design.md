@@ -3,9 +3,9 @@ title: GraphQL Schema Design
 author: Nick Harris
 date: 2020-07-26 20:46:00 -0500
 tags: [graphql]
+summary: GraphQL enables us to explicitly describe our API to remove ambiguity from how our systems communicate; however, without a standard way of designing our API we can still find ourselves with an explicitly unclear API.
+image: /assets/img/graphql-design/banner.jpg
 ---
-
-![Desktop View]({{ "/assets/img/graphql-design/banner.jpg" | relative_url }})
 
 # Introduction
 
