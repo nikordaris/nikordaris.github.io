@@ -59,7 +59,7 @@ layout: page
 
     <div class="post-content">
       <p>
-      {% assign _content = post.summary %}
+      {% assign _content = post.description %}
       {% include no-linenos.html %}
       {{ _content | markdownify | strip_html | truncate: 200 }}
       </p>
